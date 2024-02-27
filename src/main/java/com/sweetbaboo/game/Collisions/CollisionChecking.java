@@ -4,21 +4,24 @@ import com.sweetbaboo.game.Entities.Aliens.Alien;
 import com.sweetbaboo.game.Entities.Bullets.Bullet;
 import com.sweetbaboo.game.Entities.Ship.Ship;
 import com.sweetbaboo.utils.Pair;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class CollisionChecking {
 
-  public static Pair<Alien, Bullet> checkBulletHit(List<Alien> aliens, List<Bullet> bullets) {
+  public static List<Pair<Alien, Bullet>> checkBulletHit(List<Alien> aliens, List<Bullet> bullets) {
+    List<Pair<Alien, Bullet>> hits = new ArrayList<>();
     for (Alien alien : aliens) {
       HitBox alienHitBox = alien.getHitBox();
       for (Bullet bullet : bullets) {
         HitBox bulletHitBox = bullet.getHitBox(); 
         if (hitBoxesIntersect(alienHitBox, bulletHitBox)) {
-          return new Pair<>(alien, bullet);
+          hits.add(new Pair<>(alien, bullet));
         }
       }
     }
-    return null;
+    return hits;
   }
 
   public static boolean checkShipHit(Ship ship, List<Alien> aliens) {

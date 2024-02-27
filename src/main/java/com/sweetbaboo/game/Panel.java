@@ -20,6 +20,7 @@ public class Panel extends JPanel {
   private Ship ship;
   private List<Alien> aliens;
   private static final boolean DEBUG = true;
+  private int score;
 
   Panel(Ship ship, List<Alien> aliens) {
     this.ship = ship;
@@ -43,9 +44,33 @@ public class Panel extends JPanel {
     super.paint(g);
     Graphics2D g2D = (Graphics2D) g;
 
-    List<Alien> markedAliens = new ArrayList<>();
-
     // draw things in this order to get the layers correct
+    drawAliens(g2D);
+    drawBullets(g2D);
+    drawShip(g2D);
+
+    // kill aliens and remove bullets
+    handleBullets();
+    
+    drawScore(g2D);
+  }
+
+
+  private void handleBullets() {
+    List<Pair<Alien, Bullet>> hits = CollisionChecking.checkBulletHit(aliens, ship.getBullets());
+    for (Pair<Alien, Bullet> hit : hits) {
+      hit.getFirst().kill();
+      ship.removeBullet(hit.getSecond());
+      score += 100;
+    }
+  }
+
+  private void drawShip(Graphics2D g2D) {
+    g2D.drawImage(ship.getImage(), ship.getxPosition(), ship.getyPosition(), ship.getScaledWidth(), ship.getScaledHeight(), null);
+  }
+
+  private void drawAliens(Graphics2D g2D) {
+    List<Alien> markedAliens = new ArrayList<>();
     for (Alien alien : aliens) {
       if (alien.isAlive()) {
         g2D.drawImage(alien.getImage(), alien.getxPosition(), alien.getyPosition(), alien.getScaledWidth(),
@@ -58,7 +83,13 @@ public class Panel extends JPanel {
         markedAliens.add(alien);
       }
     }
-    killAliens(markedAliens);
+    aliens.removeAll(markedAliens);
+    if (DEBUG) {
+      g2D.drawString("Aliens: " + aliens.size(), 20, 60);
+    }
+  }
+
+  private void drawBullets(Graphics2D g2D) {
     for (Bullet bullet : ship.getBullets()) {
       g2D.drawImage(bullet.getImage(), bullet.getxPosition(), bullet.getyPosition(), bullet.getScaledWidth(),
           bullet.getScaledHeight(), null);
@@ -67,14 +98,14 @@ public class Panel extends JPanel {
         g2D.drawRect(hitBox.getX(), hitBox.getY(), hitBox.getWidth(), hitBox.getHeight());
       }
     }
-    g2D.drawImage(ship.getImage(), ship.getxPosition(), ship.getyPosition(), 100, 100, null);
-    Pair<Alien, Bullet> hits = CollisionChecking.checkBulletHit(aliens, ship.getBullets());
-    if (hits != null) {
-      hits.getFirst().kill();
+
+    if (DEBUG) {
+      g2D.drawString("Bullets: " + ship.getBullets().size(), 20, 40);
     }
   }
 
-  private void killAliens(List<Alien> markedAliens) {
-    aliens.removeAll(markedAliens);
+  
+  private void drawScore(Graphics2D g2D) {
+    g2D.drawString("SCORE: " + score, 20, 20);
   }
 }

@@ -23,6 +23,17 @@ public abstract class Entity {
     this.scaledWidth = width / scale;
   }
 
+  public HitBox getHitBox() {
+    int x = getxPosition();
+    int y = getyPosition();
+    return new HitBox(x, y, getScaledWidth(), getScaledHeight());
+  }
+
+  public void move(int dx, int dy) {
+    setxPosition(xPosition + dx);
+    setyPosition(yPosition + dy);
+  }
+
   public Image getImage() {
     return image;
   }
@@ -70,16 +81,4 @@ public abstract class Entity {
   public int getScaledHeight() {
     return scaledHeight;
   }
-
-  public HitBox getHitBox() {
-    int x = getxPosition();
-    int y = getyPosition();
-    return new HitBox(x, y, getScaledWidth(), getScaledHeight());
-  }
-
-  public void move(int dx, int dy) {
-    setxPosition(xPosition + dx);
-    setyPosition(yPosition + dy);
-  }
-
 }
