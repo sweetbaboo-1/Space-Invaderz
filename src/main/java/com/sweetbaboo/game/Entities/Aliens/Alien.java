@@ -5,20 +5,32 @@ import javax.swing.ImageIcon;
 import com.sweetbaboo.game.Main;
 import com.sweetbaboo.game.Entities.Entity;
 
-public class Alien extends Entity{
-  private int increment = 10;
+public class Alien extends Entity {
+  public static final int DY = 30;
+  public static final int DX = 0;
+  public static final int SCALE = 10;
+  
+  private boolean isAlive = true;
 
   public Alien() {
-    super(new ImageIcon("src\\resources\\images\\aliens\\greenAlien.png").getImage(), 1920 / 2, 150);    
+    super(new ImageIcon("src\\resources\\images\\aliens\\greenAlien.png").getImage(), (int) Main.SCREEN_WIDTH / 2, 150, Alien.SCALE);
   }
 
-  // this will probably get removed when levels are created.
-  public void move() {
-    if (this.getxPosition() > Main.SCREEN_WIDTH - this.getWidth() / 10) {
-      increment *= -1;
-    } else if (this.getxPosition() < 0) {
-      increment *= -1;
-    }
-    setxPosition(getxPosition() + increment);
+  public Alien(int i) {
+    super(new ImageIcon("src\\resources\\images\\aliens\\greenAlien.png").getImage(), (int) Main.SCREEN_WIDTH / 10 * i,
+        150, Alien.SCALE);
+  }
+
+  public void kill() {
+    // some form of death animation?
+    isAlive = false;
+  }
+
+  public boolean isAlive() {
+    return isAlive;
+  }
+
+  public void setAlive(boolean isAlive) {
+    this.isAlive = isAlive;
   }
 }

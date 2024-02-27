@@ -14,14 +14,15 @@ public class Frame extends JFrame {
 
   Panel panel;
   Ship ship = new Ship();
-  Alien alien = new Alien();
+  List<Alien> aliens = new ArrayList<>();
 
   boolean leftKeyPressed = false;
   boolean rightKeyPressed = false;
   boolean spaceBarPressed = false;
 
   Frame() {
-    panel = new Panel(ship, alien);
+    generateAliens();
+    panel = new Panel(ship, aliens);
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     this.setExtendedState(JFrame.MAXIMIZED_BOTH);
     this.setUndecorated(true);
@@ -58,7 +59,7 @@ public class Frame extends JFrame {
       public void actionPerformed(ActionEvent e) {
         List<Bullet> bulletsToRemove = new ArrayList<>();
         for (Bullet bullet : ship.getBullets()) {
-          bullet.move();
+          bullet.move(Bullet.DX, Bullet.DY);
           if (bullet.getyPosition() < -50) {
             bulletsToRemove.add(bullet);
           }
@@ -69,22 +70,27 @@ public class Frame extends JFrame {
         }
 
         if (leftKeyPressed) {
-          ship.move(Ship.LEFT);
+          ship.move(Ship.DX * -1, Ship.DY);
         }
         
         if (rightKeyPressed) {
-          ship.move(Ship.RIGHT);
+          ship.move(Ship.DX, Ship.DY);
         }
 
         if (spaceBarPressed) {
           ship.shoot();
         }
-
-        alien.move();
       }
     });
     timer.start();
 
     this.setVisible(true);
+  }
+
+  private void generateAliens() {
+    for (int i = 0; i < 10; i++) {
+      Alien alien = new Alien(i);
+      aliens.add(alien);
+    }
   }
 }

@@ -3,24 +3,29 @@ package com.sweetbaboo.game;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.ArrayList;
+
 import javax.swing.*;
 
+import com.sweetbaboo.game.Collisions.CollisionChecking;
+import com.sweetbaboo.game.Collisions.HitBox;
 import com.sweetbaboo.game.Entities.Aliens.Alien;
 import com.sweetbaboo.game.Entities.Bullets.Bullet;
 import com.sweetbaboo.game.Entities.Ship.Ship;
+import com.sweetbaboo.utils.Pair;
 
 public class Panel extends JPanel {
 
   private Ship ship;
-  private Alien alien;
-  private long lastTime;
+  private List<Alien> aliens;
+  private static final boolean DEBUG = true;
 
-  Panel(Ship ship, Alien alien) {
+  Panel(Ship ship, List<Alien> aliens) {
     this.ship = ship;
-    this.alien = alien;
+    this.aliens = aliens;
     this.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
     this.setBackground(Color.BLACK);
-    lastTime = System.nanoTime();
     startTimer();
   }
 
@@ -37,29 +42,39 @@ public class Panel extends JPanel {
   public void paint(Graphics g) {
     super.paint(g);
     Graphics2D g2D = (Graphics2D) g;
-    
+
+    List<Alien> markedAliens = new ArrayList<>();
+
     // draw things in this order to get the layers correct
-    g2D.drawImage(alien.getImage(), alien.getxPosition(), alien.getyPosition(), alien.getWidth() / 10, alien.getHeight() / 10, null);
+    for (Alien alien : aliens) {
+      if (alien.isAlive()) {
+        g2D.drawImage(alien.getImage(), alien.getxPosition(), alien.getyPosition(), alien.getScaledWidth(),
+            alien.getScaledHeight(), null);
+        if (DEBUG) {
+          HitBox hitBox = alien.getHitBox();
+          g2D.drawRect(hitBox.getX(), hitBox.getY(), hitBox.getWidth(), hitBox.getHeight());
+        }
+      } else {
+        markedAliens.add(alien);
+      }
+    }
+    killAliens(markedAliens);
     for (Bullet bullet : ship.getBullets()) {
-      g2D.drawImage(bullet.getImage(), bullet.getxPosition(), bullet.getyPosition(), bullet.getWidth() / 10, bullet.getHeight() / 10, null);
+      g2D.drawImage(bullet.getImage(), bullet.getxPosition(), bullet.getyPosition(), bullet.getScaledWidth(),
+          bullet.getScaledHeight(), null);
+      if (DEBUG) {
+        HitBox hitBox = bullet.getHitBox();
+        g2D.drawRect(hitBox.getX(), hitBox.getY(), hitBox.getWidth(), hitBox.getHeight());
+      }
     }
     g2D.drawImage(ship.getImage(), ship.getxPosition(), ship.getyPosition(), 100, 100, null);
-    
+    Pair<Alien, Bullet> hits = CollisionChecking.checkBulletHit(aliens, ship.getBullets());
+    if (hits != null) {
+      hits.getFirst().kill();
+    }
+  }
 
-    long currentTime = System.nanoTime();
-    long elapsedTime = currentTime - lastTime;
-    double fps = 1_000_000_000.0 / elapsedTime;
-
-    g.setColor(Color.WHITE);
-    g.drawString("FPS: " + (int) fps, 10, 20);
-    g.drawString("Alien Width: " + alien.getWidth(), 10, 40);
-
-    // draws a square around the border
-    // g.drawLine(0, 0, 1920, 0);
-    // g.drawLine(1920, 0, 1920, 1080);
-    // g.drawLine(1920, 1080, 0, 1080);
-    // g.drawLine(0, 0, 0, 1080);
-
-    lastTime = currentTime;
+  private void killAliens(List<Alien> markedAliens) {
+    aliens.removeAll(markedAliens);
   }
 }
