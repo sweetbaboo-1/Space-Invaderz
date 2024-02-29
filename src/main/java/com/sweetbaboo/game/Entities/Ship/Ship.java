@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import javax.swing.ImageIcon;
 
 import com.sweetbaboo.game.Main;
+import com.sweetbaboo.game.Panel;
 import com.sweetbaboo.game.Entities.Entity;
 import com.sweetbaboo.game.Entities.Bullets.Bullet;
 
@@ -14,6 +15,7 @@ public class Ship extends Entity {
   public static final int DX = 10;
   public static final int DY = 0;
   public static final int SCALE = 2;
+  public static final int BULLET_SCORE_COST = 1; // negative numbers add to the score
   public static final int RELOAD_TIME_MS = 200;
 
   private long lastShotTime = System.currentTimeMillis();
@@ -21,7 +23,7 @@ public class Ship extends Entity {
 
   public Ship() {
     super(new ImageIcon("src\\resources\\images\\ship\\ship.png").getImage(), (int) Main.SCREEN_WIDTH / 2,
-        (int) Main.SCREEN_HEIGHT - 200, Ship.SCALE);
+        (int) Main.SCREEN_HEIGHT - 300, Ship.SCALE);
   }
 
   @Override
@@ -40,10 +42,10 @@ public class Ship extends Entity {
 
   public void shoot() {
     if (System.currentTimeMillis() > lastShotTime + RELOAD_TIME_MS) {
-      // get the correct width to center the bullet in the ship
-      Bullet bullet = new Bullet(getxPosition() + getScaledWidth() / 2, getyPosition());
-      bullet.setxPosition(bullet.getxPosition() - bullet.getScaledWidth() / 2);
+      Bullet bullet = new Bullet(getxPosition() + getScaledWidth() / 2, getyPosition() + getScaledHeight() / 2);
+      bullet.centerOnPoint();
       bullets.add(bullet);
+      Panel.modifyScore(-BULLET_SCORE_COST);
       lastShotTime = System.currentTimeMillis();
     }
   }

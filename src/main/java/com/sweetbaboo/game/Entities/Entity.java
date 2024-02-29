@@ -17,10 +17,10 @@ public abstract class Entity {
     this.image = image;
     this.width = image.getWidth(null);
     this.height = image.getHeight(null);
-    this.xPosition = xPosition;
-    this.yPosition = yPosition;
     this.scaledHeight = height / scale;
     this.scaledWidth = width / scale;
+    this.xPosition = xPosition;
+    this.yPosition = yPosition;
   }
 
   public HitBox getHitBox() {
@@ -32,6 +32,27 @@ public abstract class Entity {
   public void move(int dx, int dy) {
     setxPosition(xPosition + dx);
     setyPosition(yPosition + dy);
+  }
+
+  public void centerOnPoint() {
+    setCenterX(xPosition);
+    setCenterY(yPosition);
+  }
+
+  public int getCenterX() {
+    return xPosition + scaledWidth / 2;
+  }
+  
+  public int getCenterY() {
+    return yPosition + scaledHeight / 2;
+  }
+
+  public void setCenterX(int x) {
+    xPosition = x - scaledWidth / 2;
+  }
+  
+  public void setCenterY(int y) {
+    yPosition = y - scaledHeight / 2;
   }
 
   public Image getImage() {

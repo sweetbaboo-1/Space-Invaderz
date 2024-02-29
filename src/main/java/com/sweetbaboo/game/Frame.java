@@ -21,7 +21,8 @@ public class Frame extends JFrame {
   boolean spaceBarPressed = false;
 
   Frame() {
-    generateAliens();
+    generateAliens(16, 4);
+    ship.centerOnPoint();
     panel = new Panel(ship, aliens);
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     this.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -60,7 +61,7 @@ public class Frame extends JFrame {
         List<Bullet> bulletsToRemove = new ArrayList<>();
         for (Bullet bullet : ship.getBullets()) {
           bullet.move(Bullet.DX, Bullet.DY);
-          if (bullet.getyPosition() < -50) {
+          if (bullet.getyPosition() < -100) {
             bulletsToRemove.add(bullet);
           }
         }
@@ -70,9 +71,9 @@ public class Frame extends JFrame {
         }
 
         if (leftKeyPressed) {
-          ship.move(Ship.DX * -1, Ship.DY);
+          ship.move(-Ship.DX, Ship.DY);
         }
-        
+
         if (rightKeyPressed) {
           ship.move(Ship.DX, Ship.DY);
         }
@@ -83,14 +84,18 @@ public class Frame extends JFrame {
       }
     });
     timer.start();
-
     this.setVisible(true);
   }
 
-  private void generateAliens() {
-    for (int i = 0; i < 10; i++) {
-      Alien alien = new Alien(i);
-      aliens.add(alien);
+  private void generateAliens(int n, int rows) {
+    int offset = (int) Main.SCREEN_WIDTH / (n + 1);
+    for (int r = 0; r < rows; r++) {
+      for (int i = 1; i <= n; i++) {
+        Alien alien = new Alien(offset * (i));
+        alien.centerOnPoint();
+        alien.setCenterY(alien.getCenterY() * r + alien.getScaledHeight() * 2);
+        aliens.add(alien);
+      }
     }
   }
 }
