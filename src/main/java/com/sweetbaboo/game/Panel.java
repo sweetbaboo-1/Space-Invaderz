@@ -19,7 +19,7 @@ import com.sweetbaboo.utils.Pair;
 public class Panel extends JPanel {
 
   private static final boolean DEBUG = false;
-  private static final int ALIEN_BASE_SPEED = 5;
+  private static final int ALIEN_BASE_SPEED = 10;
 
   private Ship ship;
   private List<Alien> aliens;
@@ -56,7 +56,7 @@ public class Panel extends JPanel {
     explode(g2D);
 
     // move aliens and check for collision with ship
-    moveAliens();
+    moveAliens(g2D);
     handleShipCollision(g2D);
 
     drawScore(g2D);
@@ -81,8 +81,16 @@ public class Panel extends JPanel {
     if (playerWon) {
       drawCenteredString(g2D, "YOU SAVED THE WORLD!", Color.WHITE);
     } else {
+      explodePlayer(g2D);
       drawCenteredString(g2D, "YOU LOSE...", Color.RED);
     }
+  }
+
+  private void explodePlayer(Graphics2D g2d) {
+    Explosion explosion = new Explosion(ship.getCenterX(), ship.getCenterY());
+    explosion.centerOnPoint();
+    g2d.drawImage(explosion.getImage(), explosion.getxPosition(), explosion.getyPosition(),
+            explosion.getScaledWidth(), explosion.getScaledHeight(), null);
   }
 
   private void drawCenteredString(Graphics2D g2d, String text, Color color) {
@@ -94,7 +102,7 @@ public class Panel extends JPanel {
     g2d.drawString(text, Main.SCREEN_WIDTH / 2 - textWidth / 2, Main.SCREEN_HEIGHT / 2 - textHeight / 2);
   }
 
-  private void moveAliens() {
+  private void moveAliens(Graphics2D g2d) {
     boolean shouldDescend = false;
     for (Alien alien : aliens) {
       // check if any alien will collide with the left or right wall
@@ -105,11 +113,21 @@ public class Panel extends JPanel {
         break;
       }
     }
+
     for (Alien alien : aliens) {
       alien.move(alienSpeed, shouldDescend ? alien.getScaledHeight() + Frame.ALIEN_GAP_BETWEEN_ROWS : 0);
+      if (alien.getyPosition() + alien.getScaledHeight() >= Main.SCREEN_HEIGHT) {
+        gameOver = true;
+        gameOver(false, g2d);
+      }
     }
+
     if (shouldDescend) {
-      alienSpeed++;
+      if (alienSpeed < 0) {
+        alienSpeed -= 1;
+      } else {
+        alienSpeed += 1;
+      }
     }
   }
 
