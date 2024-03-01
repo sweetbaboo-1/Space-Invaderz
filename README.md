@@ -1,6 +1,6 @@
 # Space Invaderz
 
-![Example of a 2x6 floor](src\resources\images\game\Game.png)
+![Game Image](src\resources\images\game\Game.png)
 
 ## Description
 
@@ -20,9 +20,9 @@ Space Invaderz is a classic arcade-style game implemented in Java using the 2D g
 
 3. **Winning and Losing:**
    - If you successfully destroy all the aliens, you win the game.
-     ![Example of a 2x6 floor](src\resources\images\game\GameWin.png)
+     ![Victory Image](space-invaderz\src\resources\images\game\GameWin.png)
    - If any alien makes contact with your spaceship, you lose the game.
-     ![Example of a 2x6 floor](src\resources\images\game\GameLose.png)
+     ![Loss Image](space-invaderz\src\resources\images\game\GameLose.png)
 
 ## License
 
