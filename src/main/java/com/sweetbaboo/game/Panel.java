@@ -18,21 +18,30 @@ import com.sweetbaboo.utils.Pair;
 
 public class Panel extends JPanel {
 
+  private static final boolean DEBUG = false;
+  private static final int ALIEN_BASE_SPEED = 5;
+
   private Ship ship;
   private List<Alien> aliens;
-  private static final boolean DEBUG = false;
   private static int score;
   private List<Explosion> explosions;
+  private int alienSpeed;
+  private boolean gameOver = false;
 
   Panel(Ship ship, List<Alien> aliens) {
     this.ship = ship;
     this.aliens = aliens;
     this.explosions = new ArrayList<>();
-    this.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
+    this.alienSpeed = ALIEN_BASE_SPEED;
+    this.setPreferredSize(new Dimension(Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT));
     this.setDoubleBuffered(true);
     startTimer();
   }
+
   public void paint(Graphics g) {
+    if (gameOver)
+      return;
+
     super.paint(g);
     Graphics2D g2D = (Graphics2D) g;
 
@@ -45,26 +54,78 @@ public class Panel extends JPanel {
     // kill aliens remove bullets, make explosions
     handleBullets();
     explode(g2D);
-    
+
+    // move aliens and check for collision with ship
     moveAliens();
-    
+    handleShipCollision(g2D);
+
     drawScore(g2D);
-    
-    if (DEBUG) g2D.drawLine((int)Main.SCREEN_WIDTH/2, 0, (int) Main.SCREEN_WIDTH / 2, (int) Main.SCREEN_HEIGHT);
+
+    if (aliens.size() == 0) {
+      gameOver = true;
+      gameOver(true, g2D);
+    }
+
+    if (DEBUG)
+      g2D.drawLine(Main.SCREEN_WIDTH / 2, 0, Main.SCREEN_WIDTH / 2, Main.SCREEN_HEIGHT);
+  }
+
+  private void handleShipCollision(Graphics2D g2D) {
+    if (CollisionChecking.checkShipHit(ship, aliens)) {
+      gameOver = true;
+      gameOver(false, g2D);
+    }
+  }
+
+  private void gameOver(boolean playerWon, Graphics2D g2D) {
+    if (playerWon) {
+      drawCenteredString(g2D, "YOU SAVED THE WORLD!", Color.WHITE);
+    } else {
+      drawCenteredString(g2D, "YOU LOSE...", Color.RED);
+    }
+  }
+
+  private void drawCenteredString(Graphics2D g2d, String text, Color color) {
+    g2d.setFont(new Font("Arial", Font.BOLD, 70));
+    g2d.setColor(color);
+    FontMetrics fm = g2d.getFontMetrics();
+    int textWidth = fm.stringWidth(text);
+    int textHeight = fm.getHeight();
+    g2d.drawString(text, Main.SCREEN_WIDTH / 2 - textWidth / 2, Main.SCREEN_HEIGHT / 2 - textHeight / 2);
   }
 
   private void moveAliens() {
+    boolean shouldDescend = false;
     for (Alien alien : aliens) {
-      break;
-    }
-  }
-  private void explode(Graphics2D g2D) {
-    for (Explosion explosion : explosions) {
-      if (explosion.shouldExist()) {
-        g2D.drawImage(explosion.getImage(), explosion.getxPosition(), explosion.getyPosition(), explosion.getScaledWidth(), explosion.getScaledHeight(), null);
+      // check if any alien will collide with the left or right wall
+      if (alien.getxPosition() + alienSpeed <= 0
+          || alien.getxPosition() + alienSpeed >= Main.SCREEN_WIDTH - alien.getScaledWidth()) {
+        alienSpeed = -alienSpeed;
+        shouldDescend = true;
+        break;
       }
     }
+    for (Alien alien : aliens) {
+      alien.move(alienSpeed, shouldDescend ? alien.getScaledHeight() + Frame.ALIEN_GAP_BETWEEN_ROWS : 0);
+    }
+    if (shouldDescend) {
+      alienSpeed++;
+    }
   }
+
+  private void explode(Graphics2D g2D) {
+    List<Explosion> toRemove = new ArrayList<>();
+    for (Explosion explosion : explosions) {
+      if (explosion.shouldExist()) {
+        g2D.drawImage(explosion.getImage(), explosion.getxPosition(), explosion.getyPosition(),
+            explosion.getScaledWidth(), explosion.getScaledHeight(), null);
+      } else {
+        toRemove.add(explosion);
+      }
+    }
+    explosions.removeAll(toRemove);
+  }
+
   private void drawBackgroundImage(Graphics2D g2D) {
     Image backgroundImage = new ImageIcon("src\\resources\\images\\backgrounds\\spaceImage.jpg").getImage();
     g2D.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), null);
@@ -75,7 +136,7 @@ public class Panel extends JPanel {
     for (Pair<Alien, Bullet> hit : hits) {
       hit.getFirst().kill();
       ship.removeBullet(hit.getSecond());
-      
+
       // create explosions
       Explosion explosion = new Explosion(hit.getFirst().getCenterX(), hit.getFirst().getCenterY());
       explosion.centerOnPoint();
@@ -85,7 +146,8 @@ public class Panel extends JPanel {
   }
 
   private void drawShip(Graphics2D g2D) {
-    g2D.drawImage(ship.getImage(), ship.getxPosition(), ship.getyPosition(), ship.getScaledWidth(), ship.getScaledHeight(), null);
+    g2D.drawImage(ship.getImage(), ship.getxPosition(), ship.getyPosition(), ship.getScaledWidth(),
+        ship.getScaledHeight(), null);
     if (DEBUG) {
       drawHitBox(ship.getHitBox(), g2D);
     }
@@ -133,11 +195,11 @@ public class Panel extends JPanel {
   private void drawHitBox(HitBox hitBox, Graphics2D g2D) {
     g2D.drawRect(hitBox.getX(), hitBox.getY(), hitBox.getWidth(), hitBox.getHeight());
     g2D.drawLine(hitBox.getX(), hitBox.getY(), hitBox.getX() + hitBox.getWidth(), hitBox.getY() + hitBox.getHeight());
-    g2D.drawLine(hitBox.getX(),  hitBox.getY() + hitBox.getHeight(), hitBox.getX() + hitBox.getWidth(), hitBox.getY());
+    g2D.drawLine(hitBox.getX(), hitBox.getY() + hitBox.getHeight(), hitBox.getX() + hitBox.getWidth(), hitBox.getY());
   }
 
   private void startTimer() {
-    Timer timer = new Timer(16, new ActionListener() {
+    Timer timer = new Timer(Main.FRAME_DELAY, new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         repaint();

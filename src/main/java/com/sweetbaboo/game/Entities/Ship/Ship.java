@@ -14,16 +14,17 @@ public class Ship extends Entity {
 
   public static final int DX = 10;
   public static final int DY = 0;
-  public static final int SCALE = 2;
-  public static final int BULLET_SCORE_COST = 1; // negative numbers add to the score
+  public static final int SCALE = 3; // * Main.SCALE;
+  public static final int BULLET_SCORE_COST = 0; // negative numbers add to the score
   public static final int RELOAD_TIME_MS = 200;
+  public static final int SHIP_GAP_FROM_BOTTOM = 100;
 
   private long lastShotTime = System.currentTimeMillis();
   private List<Bullet> bullets = new ArrayList<>();
 
   public Ship() {
-    super(new ImageIcon("src\\resources\\images\\ship\\ship.png").getImage(), (int) Main.SCREEN_WIDTH / 2,
-        (int) Main.SCREEN_HEIGHT - 300, Ship.SCALE);
+    super(new ImageIcon("src\\resources\\images\\ship\\ship.png").getImage(), Main.SCREEN_WIDTH / 2,
+        Main.SCREEN_HEIGHT - SHIP_GAP_FROM_BOTTOM, Ship.SCALE);
   }
 
   @Override
@@ -35,7 +36,7 @@ public class Ship extends Entity {
     if (xPosition > Main.SCREEN_WIDTH) {
       xPosition = -width;
     } else if (xPosition < -width) {
-      xPosition = (int) Main.SCREEN_WIDTH;
+      xPosition = Main.SCREEN_WIDTH;
     }
     setxPosition(xPosition);
   }

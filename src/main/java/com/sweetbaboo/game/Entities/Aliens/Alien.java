@@ -7,13 +7,13 @@ import com.sweetbaboo.game.Entities.Entity;
 public class Alien extends Entity {
   public static final int DY = 30;
   public static final int DX = 0;
-  public static final int SCALE = 5;
+  public static final int SCALE = 7;
   
   private boolean isAlive = true;
 
   public Alien(int x) {
     super(new ImageIcon("src\\resources\\images\\aliens\\greenAlien.png").getImage(), x,
-        150, Alien.SCALE);
+    0, Alien.SCALE); // yPosition doesn't matter because in all cases we set it manually
   }
 
   public void kill() {

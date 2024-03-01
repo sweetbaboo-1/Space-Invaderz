@@ -12,7 +12,13 @@ import com.sweetbaboo.game.Entities.Ship.Ship;
 
 public class Frame extends JFrame {
 
-  Panel panel;
+
+  public static final int ALIEN_COLUMNS = 10;
+  public static final int ALIEN_ROWS = 4;
+  public static final int ALIEN_GAP_BETWEEN_ROWS = 25;
+  public static final int ALIEN_GAP_FROM_TOP = 50;
+
+Panel panel;
   Ship ship = new Ship();
   List<Alien> aliens = new ArrayList<>();
 
@@ -21,12 +27,12 @@ public class Frame extends JFrame {
   boolean spaceBarPressed = false;
 
   Frame() {
-    generateAliens(16, 4);
+    generateAliens(ALIEN_COLUMNS, ALIEN_ROWS);
     ship.centerOnPoint();
     panel = new Panel(ship, aliens);
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    this.setExtendedState(JFrame.MAXIMIZED_BOTH);
-    this.setUndecorated(true);
+    this.setTitle("Space Invaderz");
+    this.setIconImage(ship.getImage());
     this.add(panel);
     this.pack();
     this.setLocationRelativeTo(null);
@@ -55,7 +61,7 @@ public class Frame extends JFrame {
       }
     });
 
-    Timer timer = new Timer(16, new ActionListener() {
+    Timer timer = new Timer(Main.FRAME_DELAY, new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         List<Bullet> bulletsToRemove = new ArrayList<>();
@@ -66,9 +72,7 @@ public class Frame extends JFrame {
           }
         }
 
-        for (Bullet bullet : bulletsToRemove) {
-          ship.removeBullet(bullet);
-        }
+        ship.getBullets().removeAll(bulletsToRemove);
 
         if (leftKeyPressed) {
           ship.move(-Ship.DX, Ship.DY);
@@ -88,12 +92,18 @@ public class Frame extends JFrame {
   }
 
   private void generateAliens(int n, int rows) {
-    int offset = (int) Main.SCREEN_WIDTH / (n + 1);
+    // aliens should cover the center 2/3 (4/6) of the screen
+    // leaving 1/6 of the display on each side clean
+    int oneSixthScreenWidth = Main.SCREEN_WIDTH / 6;
+
+    // the offset between each alien
+    int offset = (oneSixthScreenWidth * 4) / (n + 1);
+
     for (int r = 0; r < rows; r++) {
       for (int i = 1; i <= n; i++) {
-        Alien alien = new Alien(offset * (i));
+        Alien alien = new Alien(offset * i + oneSixthScreenWidth + 4); // not sure why but aliens draw 4px to the left of center.
         alien.centerOnPoint();
-        alien.setCenterY(alien.getCenterY() * r + alien.getScaledHeight() * 2);
+        alien.setCenterY(ALIEN_GAP_FROM_TOP + r * (alien.getScaledHeight() + ALIEN_GAP_BETWEEN_ROWS));
         aliens.add(alien);
       }
     }
